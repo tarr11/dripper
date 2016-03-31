@@ -36,7 +36,7 @@ end
 
 dripper :orders do
   # send a successful order message
-  message :order_mailer, :new_order, { paid }
+  message :order_mailer, :new_order, -> { paid }
 end
 ```
 
@@ -61,6 +61,21 @@ dripper :users do
 end
 ```
 
+### User Confirmation
+This could potentially replace devise's awful mess :)
+```
+dripper :users do
+  message :user_mailer, :confirmation, -> { unconfirmed }
+end
+```
+
+### Change Password
+This will send a password changed email if the password has been changed in the last 30 minutes
+```
+dripper :users do
+  message :user_mailer, :change_password, -> { password_changed(30.minutes.ago) }
+end
+```
 
 ### Inactive User
 ```
@@ -71,7 +86,7 @@ end
 
 # dripper code uses scope
 dripper :users do
-  message :user_mailer, :inactive, { inactive }
+  message :user_mailer, :inactive, -> { inactive }
 end
 ```
 
@@ -91,7 +106,7 @@ class InactiveUser
 end
 
 dripper :inactive_users do
-  message :inactive_mailer, :inactive
+  message :inactive_mailer, -> {:inactive}
 end
 ```
 
@@ -139,7 +154,21 @@ Use this method sparingly, as it will create lots of run-time load.
 
 ```
 class User
-  acts_as_dripper
+  acts_as_dripper 
+end
+```
+
+You can also just set it for specific methods
+```
+class User
+  acts_as_dripper only: [:change_password]
+end
+```
+
+or exclude just one
+```
+class User
+  acts_as_dripper except: [:expensive_query]
 end
 ```
 
