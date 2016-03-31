@@ -2,7 +2,16 @@
 
 Clean up your mailer code with a rules-based drip campaign system that works natively with rails
 
-Here's the key insight:
+## Status
+This project only exists in my mind, but I wanted to write out how I think it should work.
+
+## Benefits:
+ * Remove mailer code from your controllers
+ * Rely on active record scopes 
+ * Build complex DRIP campaigns in a DRY fashion
+
+
+## Key insight:
 
 To clean up your messaging code, each message should have a corresponding record in a model.  So, instead of trying to navigate through your user to an order, chat, message, or whatever, you just put the rules on the chat, order and message.
 
@@ -96,8 +105,6 @@ Sometimes you want to evaluate immediately instead of waiting for a rake task.
 This method will hook into ActiveRecord post_commit hooks and queries on a per-record basis (for create / update)
 
 Use this method sparingly, as it will create lots of run-time load.
-
-
 
 ```
 class User
