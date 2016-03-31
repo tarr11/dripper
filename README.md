@@ -12,10 +12,11 @@ To clean up your messaging code, each message should have a corresponding record
   dripper.config do
     email_model :users
     email_field :email
+    throttle: 1.days # will not send a message to this user more than every 3 days
+    start_at: "2016-03-01" # do not send any messages for models with a created_at date before this date
+    dripper_queue :active_job # when acts_as_dripper is included, it will queue through active job
   end
 ```
-  
-
 
 ## Simple Stuff
 ```
@@ -83,10 +84,33 @@ dripper :weekly_digest do
 end
 ```
 
+## Rake Task 
+```
+# runs all open drippers
+rake dripper:run
+```
+
+## Run immediately
+Sometimes you want to evaluate immediately instead of waiting for a rake task.
+
+This method will hook into ActiveRecord post_commit hooks and queries on a per-record basis (for create / update)
+
+Use this method sparingly, as it will create lots of run-time load.
+
+
+
+```
+class User
+  acts_as_dripper
+end
+```
+
+
 ## Details
 
 * We will only send one message per this key [:id, :mailer, :action]
-* Use scopes to control who if a message gets sent
+* Use scopes to control if a message gets sent
 * Create new models for transactional emails
+
 
 This project rocks and uses MIT-LICENSE.
