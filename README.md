@@ -46,6 +46,26 @@ dripper :users do
 end
 ```
 
+Notice in this case, we will only send 1 inactive message, ever.  If you want to send more than one, you should create a new model that corresponds to the mailer.  Run a rake task that populates this model.  
+
+This may sounds like a pain, but things will be cleaner and you will be able to control what gets sent when.   You'll also get the benefit of seeing your inactive users in a nice queryable format.
+
+Here's how that would look:
+
+### Inactive User every few months
+```
+class InactiveUser
+  # user_id, :integer
+  # inactive_at :datetime
+  
+   belongs_to :user
+end
+
+dripper :inactive_users do
+  message :inactive_mailer, :inactive
+end
+```
+
 ### Transactional Message
 This will send a new email on every chat
 ```
@@ -55,7 +75,7 @@ end
 ```
 
 ### Weekly Digest message
-In this case, if we want to send a weekly digest, we should have a weekly digest AR model that gets populated by a rake task.
+Similarly, in this case, if we want to send a weekly digest, we should have a weekly digest AR model that gets populated by a rake task.
 
 ```
 dripper :weekly_digest do
