@@ -1,8 +1,8 @@
-= Dripper
+# Dripper
 
 Clean up your mailer code with a rules-based drip campaign system that works natively with rails
 
-== Simple Stuff
+## Simple Stuff
 ```
 dripper :users do 
   # send a welcome message
@@ -13,13 +13,12 @@ dripper :orders do
   # send a successful order message
   message :order_mailer, :new_order, { paid }
 end
-
 ```
 
-== Drip Stuff
+## Drip Stuff
 Drip messages are designed to get people to take specific actions based on their lifecycle
 
-=== Inactive User
+### Inactive User
 ```
 # define inactive scope
 class User 
