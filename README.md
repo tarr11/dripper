@@ -107,6 +107,18 @@ end
 Similarly, in this case, if we want to send a weekly digest, we should have a weekly digest AR model that gets populated by a rake task.
 
 ```
+class WeeklyDigest
+  belongs_to :user
+  # week_start_on, week_end_on
+  # other stuff
+  
+  def self.create_weekly_digest(start_on)
+    User.all.each do |u|
+      u.weekly_digests.create week_start_on: start_on, week_end_on: start_on + 1.weeks
+    end
+  end
+end
+
 dripper :weekly_digest do
   message :digest_mailer, :weekly_digest 
 end
