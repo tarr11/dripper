@@ -90,7 +90,9 @@ dripper :users do
 end
 ```
 
-Notice in this case, we will only send 1 inactive message, ever.  If you want to send more than one, you should create a new model that corresponds to the mailer.  Run a rake task that populates this model.  
+Notice in this case, we will only send 1 inactive message, ever.  Also this one would require a rake task , as the user would not be triggering it (since they are inactive)  Alternatively you could have a rake task that sets inactive_at.
+
+If you want to send more than one, you should create a new model that corresponds to the mailer.  Run a rake task that populates this model.  
 
 This may sounds like a pain, but things will be cleaner and you will be able to control what gets sent when.   You'll also get the benefit of seeing your inactive users in a nice queryable format.
 
