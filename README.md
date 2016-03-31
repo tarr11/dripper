@@ -29,14 +29,14 @@ To clean up your messaging code, each message should have a corresponding record
 
 ## Simple Stuff
 ```
-dripper :users do 
+dripper model: :users do 
   # send a welcome message
-  message :welcome_mailer, :welcome
+  dripper mailer: :welcome_mailer, action: :welcome
 end
 
 dripper :orders do
   # send a successful order message
-  message :order_mailer, :new_order, -> { paid }
+  dripper mailer: :order_mailer, action: :new_order, scope: -> { paid }
 end
 ```
 
@@ -46,6 +46,8 @@ Drip messages are designed to get people to take specific actions based on their
 ### Step 1/2/3
 In this case, we want to sent 3 messages, on day 1,3 and 7.  We only want to send the last message if they haven't subscribed.  
 
+Note that we can nest options (mailer, scope, model, etc) which makes the code cleaner
+
 ```
 class User
   scope :day_count, ->(day_count) {where("created_at < ?", DateTime.now - day_count.days) }
@@ -53,27 +55,29 @@ class User
   scope :customer, -> {joins(:subscriptions).where("subscriptions.is_active = true") }
 end
 
-dripper :users do
-  send_message :onboarding, :day1, { day_count(1)  }
-  send_message :onboarding, :day3, { day_count(3) } 
-  send_message :onboarding, :day7_no_customer, { day_count(7).merge(-> { no_customer } ) } 
-  send_message :onboarding, :day7_customer, { day_count(7).merge(-> { customer } ) } 
+dripper model: :users, scope: -> { confirmed } do
+  dripper mailer: :onboarding do
+    dripper action: :day1, scope: -> { day_count(1)  }
+    dripper action: :day3, scope: -> { day_count(3) } 
+    dripper action: :day7_no_customer,  scope: -> { day_count(7).merge(-> { no_customer } ) } 
+    dripper action: :day7_customer,  scope: -> { day_count(7).merge(-> { customer } ) } 
+  end
 end
 ```
 
 ### User Confirmation
 This could potentially replace devise's awful mess :)
 ```
-dripper :users do
-  message :user_mailer, :confirmation, -> { unconfirmed }
+dripper model: :users do
+  dripper mailer: :user_mailer, actio: :confirmation, scope: -> { unconfirmed }
 end
 ```
 
 ### Change Password
 This will send a password changed email if the password has been changed in the last 30 minutes
 ```
-dripper :users do
-  message :user_mailer, :change_password, -> { password_changed(30.minutes.ago) }
+dripper model: :users do
+  dripper mailer: :user_mailer, action: :change_password, scope: -> { password_changed(30.minutes.ago) }
 end
 ```
 
@@ -85,8 +89,8 @@ class User
 end
 
 # dripper code uses scope
-dripper :users do
-  message :user_mailer, :inactive, -> { inactive }
+dripper model: :users do
+  dripper mailer: :user_mailer, action: :inactive, scope: :inactive, -> { inactive }
 end
 ```
 
@@ -108,7 +112,7 @@ class InactiveUser
 end
 
 dripper :inactive_users do
-  message :inactive_mailer, -> {:inactive}
+  dripper :inactive_mailer, -> {:inactive}
 end
 ```
 
@@ -116,7 +120,7 @@ end
 This will send a new email on every chat
 ```
 dripper :chat_message do
-  message :chat_mailer, :new_chat
+  dripper :chat_mailer, :new_chat
 end
 ```
 
@@ -136,8 +140,8 @@ class WeeklyDigest
   end
 end
 
-dripper :weekly_digest do
-  message :digest_mailer, :weekly_digest 
+dripper model: :weekly_digest do
+  dripper mailer: :digest_mailer, action: :weekly_digest 
 end
 ```
 
