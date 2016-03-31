@@ -40,8 +40,27 @@ dripper :orders do
 end
 ```
 
-## Drip Stuff
+## Marketing / DRIP Stuff
 Drip messages are designed to get people to take specific actions based on their lifecycle
+
+### Step 1/2/3
+In this case, we want to sent 3 messages, on day 1,3 and 7.  We only want to send the last message if they haven't subscribed.  
+
+```
+class User
+  scope :day_count, ->(day_count) {where("created_at < ?", DateTime.now - day_count.days) }
+  scope :no_customer, -> {where.not(:id => Subscription.select(:user_id).uniq) }
+  scope :customer, -> {joins(:subscriptions).where("subscriptions.is_active = true") }
+end
+
+dripper :users do
+  send_message :onboarding, :day1, { day_count(1)  }
+  send_message :onboarding, :day3, { day_count(3) } 
+  send_message :onboarding, :day7_no_customer, { day_count(7).merge(-> { no_customer } ) } 
+  send_message :onboarding, :day7_customer, { day_count(7).merge(-> { customer } ) } 
+end
+```
+
 
 ### Inactive User
 ```
