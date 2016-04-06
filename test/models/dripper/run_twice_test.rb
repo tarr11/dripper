@@ -3,22 +3,23 @@ require 'mocha'
 require 'mocha/mini_test'
 
 module Dripper
-  class MessageTest < ActiveSupport::TestCase
+  class RunTwiceTest < ActiveSupport::TestCase
     require 'dripper'
 
     def setup
-      # create the mailer
-      User.create(email: "foo@bar.com", username: "foo")
-      User.create(email: "foo2@bar.com")
-      User.create(email: "foo3@bar.com")
-
       Dripper.config model: :users do
         dripper mailer: :user_mailer do
-          dripper action: :welcome
-          dripper action: :newsletter, scope: -> {has_username}
+          dripper action: :welcome#, scope: -> {has_username}
+          dripper action: :newsletter#, scope: -> {has_username}
         end
       end
 
+      # create the mailer
+      User.create!(email: "foo@bar.com", username: "foo")
+      User.create!(email: "foo2@bar.com")
+      User.create!(email: "foo3@bar.com")
+      # run it once
+      Dripper.execute
     end
 
 
@@ -26,11 +27,9 @@ module Dripper
       Dripper.registry.clear
     end
 
-    test "Config" do
-      assert Dripper.registry.count == 2
-    end
+    test "2nd Run" do
 
-    test "Integration" do
+      # make sure it never runs again for the same users
       msg = mock()
       msg.stubs(:deliver_now)
 
@@ -38,18 +37,16 @@ module Dripper
       UserMailer.stubs(:welcome)
         .with(instance_of(User))
         .returns(msg)
-        .at_least(3)
-        .at_most(3)
+        .never
 
       UserMailer.stubs(:newsletter)
         .with(instance_of(User))
         .returns(msg)
-        .once
+        .never
 
-      Dripper.execute
+      Dripper.registry.second.execute
 
     end
-
 
   end
 end

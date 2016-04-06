@@ -11,15 +11,31 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160331213900) do
+ActiveRecord::Schema.define(version: 20160406210441) do
+
+  create_table "dripper_actions", force: :cascade do |t|
+    t.string   "mailer",     null: false
+    t.string   "action",     null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
 
   create_table "dripper_messages", force: :cascade do |t|
-    t.integer  "drippable_id"
-    t.string   "drippable_type"
-    t.datetime "created_at",     null: false
-    t.datetime "updated_at",     null: false
+    t.integer  "drippable_id",      null: false
+    t.string   "drippable_type",    null: false
+    t.datetime "created_at",        null: false
+    t.datetime "updated_at",        null: false
+    t.integer  "dripper_action_id"
   end
 
   add_index "dripper_messages", ["drippable_type", "drippable_id"], name: "index_dripper_messages_on_drippable_type_and_drippable_id"
+  add_index "dripper_messages", ["dripper_action_id"], name: "index_dripper_messages_on_dripper_action_id"
+
+  create_table "users", force: :cascade do |t|
+    t.string   "email"
+    t.string   "username"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
 
 end

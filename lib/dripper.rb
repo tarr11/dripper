@@ -9,6 +9,15 @@ module Dripper
 
   def self.config(opts={}, &block)
     DripperProxy.new(opts, &block)
+    @registry.each do |r|
+      r.register
+    end
+  end
+
+  def self.execute
+    @registry.each do |d|
+      d.execute
+    end
   end
 
 end
@@ -33,6 +42,10 @@ class DripperProxy
     opts.each { |k,v| instance_variable_set("@#{k}", v) }
     @children = []
     instance_eval(&block) if block
+    # only include complete ones in the registry
+    if self.action && self.mailer && self.model
+      Dripper.registry << self
+    end
   end
 
   def dripper(opts={}, &block)
@@ -40,17 +53,37 @@ class DripperProxy
     @children << proxy
   end
 
+  def register
+    Dripper::Action.where(action: self.action.to_s, mailer: self.mailer.to_s).first_or_create
+  end
 
-  def execute(association)
+  def execute
+    dripper_action = Dripper::Action.find_by(action: self.action.to_s, mailer: self.mailer.to_s)
 
-    association = get_association(self.model, self.scope)
+    all_recs = self.model.to_s.classify.constantize.send(:all)
 
-    association.each do |obj|
+      # only send if we haven't already
+    already_sent = Dripper::Message
+      .where(drippable_type: self.model.to_s.classify.to_s, dripper_action_id: dripper_action.id)
+      .select(:drippable_id)
+
+    scoped_recs =  all_recs
+      .merge(self.scope)
+      .where.not(id: already_sent)
+      .where("#{self.model.to_s.classify.constantize.table_name}.created_at >= ?", dripper_action.created_at.change(usec: 0))
+
+
+    scoped_recs.each do |obj|
+
       # instantiate the mailer and run the code
-      mailer_obj = self.mailer
-      mail_obj = mailer.send self.action, obj
+      mailer_obj = self.mailer.to_s.classify.constantize
+      mail_obj = mailer_obj.send self.action, obj
       mail_obj.deliver_now
+
+      # insert a row
+      Dripper::Message.create!(dripper_action_id: dripper_action.id, drippable: obj)
     end
+
 
   end
 end
