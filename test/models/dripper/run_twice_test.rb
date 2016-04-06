@@ -9,8 +9,8 @@ module Dripper
     def setup
       Dripper.config model: :users do
         dripper mailer: :user_mailer do
-          dripper action: :welcome#, scope: -> {has_username}
-          dripper action: :newsletter#, scope: -> {has_username}
+          dripper action: :welcome
+          dripper action: :newsletter, scope: -> {has_username}
         end
       end
 
