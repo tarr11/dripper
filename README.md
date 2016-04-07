@@ -56,12 +56,6 @@ rails c
 Newsletter.create(user: User.first, subject: "Hello!")
 ```
 
-### Step 6: Use a rake task instead
-If you don't want to run synchronously, use a rake task to call it instead
-```
-rake Dripper::run
-```
-
 
 ## Use Scopes to limit who this gets sent to
 ``` config/initializers/dripper.rb
@@ -178,37 +172,13 @@ end
 ```
 
 ## Rake Task 
+NOTE: this doesn't work yet...
+
 ```
 # runs all open drippers
 rake dripper:run
 ```
 
-## Run immediately
-Sometimes you want to evaluate immediately instead of waiting for a rake task.
-
-This method will hook into ActiveRecord post_commit hooks and queries on a per-record basis (for create / update)
-
-Use this method sparingly, as it will create lots of run-time load.
-
-```
-class User
-  acts_as_dripper 
-end
-```
-
-You can also just set it for specific methods
-```
-class User
-  acts_as_dripper only: [:change_password]
-end
-```
-
-or exclude just one
-```
-class User
-  acts_as_dripper except: [:expensive_query]
-end
-```
 
 
 ## Details
