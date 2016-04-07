@@ -18,7 +18,7 @@ Clean up your email messaging code by creating a rails model for each message. S
 
 ### Step 1: Add to your gemfile and then `bundle install`
 ```
-gem 'dripper', github: "tarr11/dripper"
+gem 'dripper_mail'
 ```
 
 ### Step 2: Install Migrations
