@@ -1,4 +1,5 @@
 # Dripper
+[![Build Status](https://travis-ci.org/tarr11/dripper.svg?branch=master)](https://travis-ci.org/tarr11/dripper)
 
 DRY up your mailer code with a rules-based drip campaign system that works natively with rails and ActionMailer.
 
