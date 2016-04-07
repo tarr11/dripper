@@ -7,17 +7,64 @@ DRY up your mailer code with a rules-based drip campaign system that works nativ
  * Rely on active record scopes 
  * Build sophisticated DRIP campaigns in a DRY fashion
 
-## Key insight:
+## Why:
 
 To clean up your messaging code, each message should have a corresponding record in a model.  So, instead of trying to navigate through your user to an order, chat, message, or whatever, you just put the rules on the chat, order and message.
 
+## Get Started
 
-## Simple Stuff
+### Step 1: Add to your gemfile and then `bundle install`
+```
+gem 'dripper', github: "tarr11/dripper"
+```
+
+### Step 2: Install Migrations
+```
+rake dripper:install:migrations
+rake db:migrate
+```
+
+### Step 3: Add a simple configuration file
 ``` config/initializers/dripper.rb
   Dripper.config model: :users do
     # send a welcome message when a user is created
     dripper mailer: :welcome_mailer, action: :welcome
   end
+```
+
+### Step 4: Include dripper in your models so emails get sent automatically
+```
+class Newsletter < ActiveRecord::Base
+  include Dripper::Drippable
+  belongs_to :user
+end
+```
+
+This example expects you to have a mailer method that looks like this:
+```
+class UserMailer < ApplicationMailer
+  def newsletter(newsletter)
+    mail to: "to@example.org"
+  end
+end
+```
+
+### Step 5: Go! 
+Simply create a new model and insert it into your database.  your Mail code will get called automatically. 
+```
+rails c
+Newsletter.create(user: User.first, subject: "Hello!")
+```
+
+### Step 6: Use a rake task instead
+If you don't want to run synchronously, use a rake task to call it instead
+```
+rake Dripper::run
+```
+
+
+## Use Scopes to limit who this gets sent to
+``` config/initializers/dripper.rb
 
   dripper :orders do
     # send a successful order message
@@ -167,6 +214,7 @@ end
 ## Details
 
 * We will only send one message per this key [:id, :mailer, :action]
+* By default, we will only send to NEW records (so that you don't spam your entire list on your first deploy)
 * Use scopes to control if a message gets sent
 * Create new models for transactional emails
 
