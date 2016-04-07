@@ -44,7 +44,7 @@ module Dripper
         .returns(msg)
         .never
 
-      Dripper.registry.second.execute
+      Dripper.execute
 
     end
 

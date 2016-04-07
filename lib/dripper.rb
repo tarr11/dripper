@@ -1,4 +1,5 @@
 require "dripper/engine"
+require "dripper/drippable"
 
 module Dripper
   @registry = []
@@ -57,7 +58,7 @@ class DripperProxy
     Dripper::Action.where(action: self.action.to_s, mailer: self.mailer.to_s).first_or_create
   end
 
-  def execute
+  def execute(item = nil)
     dripper_action = Dripper::Action.find_by(action: self.action.to_s, mailer: self.mailer.to_s)
 
     all_recs = self.model.to_s.classify.constantize.send(:all)
@@ -71,6 +72,10 @@ class DripperProxy
       .merge(self.scope)
       .where.not(id: already_sent)
       .where("#{self.model.to_s.classify.constantize.table_name}.created_at >= ?", dripper_action.created_at.change(usec: 0))
+
+    if item
+      scoped_recs = scoped_recs.where(id: item.id)
+    end
 
 
     scoped_recs.each do |obj|
