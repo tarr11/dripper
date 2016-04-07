@@ -15,29 +15,18 @@ This project only exists in my mind, but I wanted to write out how I think it sh
 
 To clean up your messaging code, each message should have a corresponding record in a model.  So, instead of trying to navigate through your user to an order, chat, message, or whatever, you just put the rules on the chat, order and message.
 
-## Config
-```
-  # config/initializers/dripper.rb
-  dripper.config do
-    email_model :users
-    email_field :email
-    throttle: 1.days # will not send a message to this user more than every 3 days
-    start_at: "2016-03-01" # do not send any messages for models with a created_at date before this date
-    dripper_queue :active_job # when acts_as_dripper is included, it will queue through active job
-  end
-```
 
 ## Simple Stuff
-```
-dripper model: :users do 
-  # send a welcome message
-  dripper mailer: :welcome_mailer, action: :welcome
-end
+``` config/initializers/dripper.rb
+  Dripper.config model: :users do
+    # send a welcome message when a user is created
+    dripper mailer: :welcome_mailer, action: :welcome
+  end
 
-dripper :orders do
-  # send a successful order message
-  dripper mailer: :order_mailer, action: :new_order, scope: -> { paid }
-end
+  dripper :orders do
+    # send a successful order message
+    dripper mailer: :order_mailer, action: :new_order, scope: -> { paid }
+  end
 ```
 
 ## Marketing / DRIP Stuff
