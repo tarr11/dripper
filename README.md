@@ -1,43 +1,69 @@
 # Dripper
 
-Clean up your mailer code with a rules-based drip campaign system that works natively with rails
-
-## Status
-This project only exists in my mind, but I wanted to write out how I think it should work.
+DRY up your mailer code with a rules-based drip campaign system that works natively with rails and ActionMailer.
 
 ## Benefits:
- * Remove mailer code from your controllers
+ * Remove mailer state logic from your controllers
  * Rely on active record scopes 
- * Build complex DRIP campaigns in a DRY fashion
+ * Build sophisticated DRIP campaigns in a DRY fashion
 
-
-## Key insight:
+## Why:
 
 To clean up your messaging code, each message should have a corresponding record in a model.  So, instead of trying to navigate through your user to an order, chat, message, or whatever, you just put the rules on the chat, order and message.
 
-## Config
+## Get Started
+
+### Step 1: Add to your gemfile and then `bundle install`
 ```
-  # config/initializers/dripper.rb
-  dripper.config do
-    email_model :users
-    email_field :email
-    throttle: 1.days # will not send a message to this user more than every 3 days
-    start_at: "2016-03-01" # do not send any messages for models with a created_at date before this date
-    dripper_queue :active_job # when acts_as_dripper is included, it will queue through active job
+gem 'dripper', github: "tarr11/dripper"
+```
+
+### Step 2: Install Migrations
+```
+rake dripper:install:migrations
+rake db:migrate
+```
+
+### Step 3: Add a simple configuration file
+``` config/initializers/dripper.rb
+  Dripper.config model: :users do
+    # send a welcome message when a user is created
+    dripper mailer: :welcome_mailer, action: :welcome
   end
 ```
 
-## Simple Stuff
+### Step 4: Include dripper in your models so emails get sent automatically
 ```
-dripper model: :users do 
-  # send a welcome message
-  dripper mailer: :welcome_mailer, action: :welcome
+class Newsletter < ActiveRecord::Base
+  include Dripper::Drippable
+  belongs_to :user
 end
+```
 
-dripper :orders do
-  # send a successful order message
-  dripper mailer: :order_mailer, action: :new_order, scope: -> { paid }
+This example expects you to have a mailer method that looks like this:
+```
+class UserMailer < ApplicationMailer
+  def newsletter(newsletter)
+    mail to: "to@example.org"
+  end
 end
+```
+
+### Step 5: Go! 
+Simply create a new model and insert it into your database.  your Mail code will get called automatically. 
+```
+rails c
+Newsletter.create(user: User.first, subject: "Hello!")
+```
+
+
+## Use Scopes to limit who this gets sent to
+``` config/initializers/dripper.rb
+
+  dripper :orders do
+    # send a successful order message
+    dripper mailer: :order_mailer, action: :new_order, scope: -> { paid }
+  end
 ```
 
 ## Marketing / DRIP Stuff
@@ -146,42 +172,19 @@ end
 ```
 
 ## Rake Task 
+NOTE: this doesn't work yet...
+
 ```
 # runs all open drippers
 rake dripper:run
 ```
 
-## Run immediately
-Sometimes you want to evaluate immediately instead of waiting for a rake task.
-
-This method will hook into ActiveRecord post_commit hooks and queries on a per-record basis (for create / update)
-
-Use this method sparingly, as it will create lots of run-time load.
-
-```
-class User
-  acts_as_dripper 
-end
-```
-
-You can also just set it for specific methods
-```
-class User
-  acts_as_dripper only: [:change_password]
-end
-```
-
-or exclude just one
-```
-class User
-  acts_as_dripper except: [:expensive_query]
-end
-```
 
 
 ## Details
 
 * We will only send one message per this key [:id, :mailer, :action]
+* By default, we will only send to NEW records (so that you don't spam your entire list on your first deploy)
 * Use scopes to control if a message gets sent
 * Create new models for transactional emails
 
