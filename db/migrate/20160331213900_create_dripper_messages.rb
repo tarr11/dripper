@@ -5,5 +5,13 @@ class CreateDripperMessages < ActiveRecord::Migration
 
       t.timestamps null: false
     end
+    create_table :dripper_actions do |t|
+      t.string :mailer, null: false
+      t.string :action, null: false
+
+      t.timestamps null: false
+    end
+
+    add_reference :dripper_messages, :dripper_action, index: true, foreign_key: true
   end
 end
