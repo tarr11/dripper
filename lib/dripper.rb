@@ -1,5 +1,6 @@
 require "dripper/engine"
 require "dripper/drippable"
+require "dripper/dripper_job"
 
 module Dripper
   @registry = []
@@ -34,13 +35,26 @@ class DripperProxy
   def initialize(opts={}, &block)
     # if there's a parent, initialize all values to the parent values first
     # then override with children
-    [:model, :mailer, :action, :scope].each do |method|
+    [:model, :mailer, :action].each do |method|
       parent = opts[:parent]
       if parent
         instance_variable_set "@#{method}", parent.send(method)
       end
     end
+
+    #overwrite any defined options
     opts.each { |k,v| instance_variable_set("@#{k}", v) }
+
+    # merge the parent scopes if they exist
+    if self.parent && self.parent.scope
+      if opts[:scope]
+        instance_variable_set "@scope", self.parent.scope.merge(opts[:scope])
+      else
+        instance_variable_ste "@scope", self.parent.scope
+      end
+    end
+
+
     @children = []
     instance_eval(&block) if block
     # only include complete ones in the registry
