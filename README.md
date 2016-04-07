@@ -1,15 +1,11 @@
 # Dripper
 
-Clean up your mailer code with a rules-based drip campaign system that works natively with rails
-
-## Status
-This project only exists in my mind, but I wanted to write out how I think it should work.
+DRY up your mailer code with a rules-based drip campaign system that works natively with rails and ActionMailer.
 
 ## Benefits:
- * Remove mailer code from your controllers
+ * Remove mailer state logic from your controllers
  * Rely on active record scopes 
- * Build complex DRIP campaigns in a DRY fashion
-
+ * Build sophisticated DRIP campaigns in a DRY fashion
 
 ## Key insight:
 
