@@ -1,0 +1,6 @@
+language: ruby
+bundler_args: --retry=3 --jobs=3
+cache: bundler
+sudo: false
+rvm:
+  - 2.2
