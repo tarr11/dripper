@@ -4,7 +4,6 @@ require 'mocha/mini_test'
 
 module Dripper
   class MessageTest < ActiveSupport::TestCase
-    require 'dripper'
 
     def setup
       # create the mailer
@@ -15,7 +14,7 @@ module Dripper
       Dripper.config model: :users do
         dripper mailer: :user_mailer do
           dripper action: :welcome
-          dripper action: :newsletter, scope: -> {has_username}
+          dripper action: :newsletter, wait: 1.minutes, scope: -> {has_username}
         end
       end
 
@@ -33,6 +32,7 @@ module Dripper
     test "Integration" do
       msg = mock()
       msg.stubs(:deliver_now)
+      msg.stubs(:deliver_later)
 
       # expect that welcome was called 2x, newsletter called once
       UserMailer.stubs(:welcome)

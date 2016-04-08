@@ -4,6 +4,7 @@ require "dripper/dripper_job"
 
 module Dripper
   @registry = []
+  mattr_accessor :job_queue
 
   def self.registry
     @registry
@@ -31,11 +32,13 @@ class DripperProxy
   attr_accessor :scope
   attr_accessor :parent
   attr_accessor :children
+  attr_accessor :wait
+  attr_accessor :wait_until
 
   def initialize(opts={}, &block)
     # if there's a parent, initialize all values to the parent values first
     # then override with children
-    [:model, :mailer, :action].each do |method|
+    [:model, :mailer, :action, :wait, :wait_until].each do |method|
       parent = opts[:parent]
       if parent
         instance_variable_set "@#{method}", parent.send(method)
@@ -97,10 +100,19 @@ class DripperProxy
       # instantiate the mailer and run the code
       mailer_obj = self.mailer.to_s.classify.constantize
       mail_obj = mailer_obj.send self.action, obj
-      mail_obj.deliver_now
+      if mail_obj
+        if self.wait
+          mail_obj.deliver_later(wait: self.wait)
+        elsif self.wait_until
+          mail_obj.deliver_later(wait_until: self.wait_until)
+        else
+          mail_obj.deliver_now
+        end
 
-      # insert a row
-      Dripper::Message.create!(dripper_action_id: dripper_action.id, drippable: obj)
+        # insert a row
+        Dripper::Message.create!(dripper_action_id: dripper_action.id, drippable: obj)
+      end
+
     end
 
 

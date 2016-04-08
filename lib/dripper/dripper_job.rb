@@ -7,5 +7,4 @@ class DripperJob < ActiveJob::Base
       r.execute obj
     end
   end
- 
 end

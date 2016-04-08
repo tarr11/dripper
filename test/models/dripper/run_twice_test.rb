@@ -4,7 +4,6 @@ require 'mocha/mini_test'
 
 module Dripper
   class RunTwiceTest < ActiveSupport::TestCase
-    require 'dripper'
 
     def setup
       Dripper.config model: :users do

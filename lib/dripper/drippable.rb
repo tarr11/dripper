@@ -1,4 +1,3 @@
-# yaffle/lib/yaffle/acts_as_yaffle.rb
 module Dripper
   module Drippable
     extend ActiveSupport::Concern
