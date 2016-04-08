@@ -53,7 +53,7 @@ class DripperProxy
       if opts[:scope]
         instance_variable_set "@scope", self.parent.scope.merge(opts[:scope])
       else
-        instance_variable_ste "@scope", self.parent.scope
+        instance_variable_set "@scope", self.parent.scope
       end
     end
 
