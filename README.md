@@ -70,6 +70,7 @@ Newsletter.create(user: User.first, subject: "Hello!")
 ```
 
 ## Use wait or wait_until to delay messages (see deliver_later on activemailer for details on wait/wait_until syntax)
+Use a proc for wait_until so that it gets evaluated at the correct time.
 ```
  dripper model: :users do
     dripper mailer: :welcome_mailer, action: :welcome, scope: -> { new_user }, wait_until: -> {  Date.tomorrow.noon }
