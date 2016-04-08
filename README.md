@@ -63,10 +63,18 @@ Newsletter.create(user: User.first, subject: "Hello!")
 ## Use Scopes to limit who this gets sent to
 ``` config/initializers/dripper.rb
 
-  dripper :orders do
+  dripper model: :orders do
     # send a successful order message
     dripper mailer: :order_mailer, action: :new_order, scope: -> { paid }
   end
+```
+
+## Use wait or wait_until to delay messages (see deliver_later on activemailer for details on wait/wait_until syntax)
+```
+ dripper model: :users do
+    dripper mailer: :welcome_mailer, action: :welcome, scope: -> { new_user }, wait_until: -> {  Date.tomorrow.noon }
+    dripper mailer: :welcome_mailer, action: :welcome, scope: -> { new_user }, wait: -> {  1.hours }
+ end
 ```
 
 ## Marketing / DRIP Stuff
