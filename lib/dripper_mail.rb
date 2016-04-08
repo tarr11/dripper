@@ -102,9 +102,19 @@ class DripperProxy
       mail_obj = mailer_obj.send self.action, obj
       if mail_obj
         if self.wait
-          mail_obj.deliver_later(wait: self.wait)
+          if self.wait.respond_to? :call
+            wait_date = self.wait.call
+          else
+            wait_date = self.wait
+          end
+          mail_obj.deliver_later(wait: wait_date)
         elsif self.wait_until
-          mail_obj.deliver_later(wait_until: self.wait_until)
+          if self.wait_until.respond_to? :call
+            wait_date = self.wait_until.call
+          else
+            wait_date = self.wait_until
+          end
+          mail_obj.deliver_later(wait_until: wait_date)
         else
           mail_obj.deliver_now
         end
