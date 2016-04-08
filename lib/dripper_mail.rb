@@ -75,7 +75,8 @@ class DripperProxy
     Dripper::Action.where(action: self.action.to_s, mailer: self.mailer.to_s).first_or_create
   end
 
-  def execute(item = nil)
+  def scoped_recs(item = nil)
+
     dripper_action = Dripper::Action.find_by(action: self.action.to_s, mailer: self.mailer.to_s)
 
     all_recs = self.model.to_s.classify.constantize.send(:all)
@@ -85,17 +86,23 @@ class DripperProxy
       .where(drippable_type: self.model.to_s.classify.to_s, dripper_action_id: dripper_action.id)
       .select(:drippable_id)
 
-    scoped_recs =  all_recs
+    final_scope = all_recs
       .merge(self.scope)
       .where.not(id: already_sent)
       .where("#{self.model.to_s.classify.constantize.table_name}.created_at >= ?", dripper_action.created_at.change(usec: 0))
 
     if item
-      scoped_recs = scoped_recs.where(id: item.id)
+      final_scope = final_scope.where(id: item.id)
     end
 
+    return final_scope
 
-    scoped_recs.each do |obj|
+  end
+
+  def execute(item = nil)
+
+    dripper_action = Dripper::Action.find_by(action: self.action.to_s, mailer: self.mailer.to_s)
+    scoped_recs(item).each do |obj|
 
       # instantiate the mailer and run the code
       mailer_obj = self.mailer.to_s.classify.constantize
