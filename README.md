@@ -9,14 +9,16 @@ DRY up your mailer code with a rules-based drip campaign system that works nativ
  * Build sophisticated DRIP campaigns in a DRY fashion
 
 ## Why:
+I needed a DRIP email service, and as both developer and marketer, I wanted to build something that works easily with rails.  Most DRIP SAAS products are too expensive for websites where visitors don't pay.  I love sites like intercom, but they don't make sense unless are generating revenue.  
 
-To clean up your messaging code, each message should have a corresponding record in a model.  So, instead of trying to navigate through your user to an order, chat, message, or whatever, you just put the rules on the chat, order and message.
+## Philosophy
+Clean up your email messaging code by creating a rails model for each message. So, instead of trying to navigate through your user to an order, chat, message, or whatever, you just put the rules on the chat, order and message.  
 
 ## Get Started
 
 ### Step 1: Add to your gemfile and then `bundle install`
 ```
-gem 'dripper', github: "tarr11/dripper"
+gem 'dripper_mail'
 ```
 
 ### Step 2: Install Migrations
