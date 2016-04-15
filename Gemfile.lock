@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    dripper_mail (0.0.15)
+    dripper_mail (0.0.17)
       rails (~> 4.2)
 
 GEM

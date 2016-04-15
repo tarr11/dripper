@@ -14,7 +14,9 @@ module Dripper
       Dripper.config model: :users do
         dripper mailer: :user_mailer do
           dripper action: :welcome
-          dripper action: :newsletter, wait: 1.minutes, scope: -> {has_username}
+          dripper action: :newsletter, wait: 1.minutes, scope: -> {has_username} do
+            dripper action: :newsletter_2, wait: 1.minutes, scope: -> {week_old}
+          end
         end
       end
 
@@ -26,7 +28,7 @@ module Dripper
     end
 
     test "Config" do
-      assert Dripper.registry.count == 2
+      assert Dripper.registry.count == 3
     end
 
     test "Integration" do

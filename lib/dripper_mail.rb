@@ -3,6 +3,7 @@ require "dripper/drippable"
 require "dripper/dripper_job"
 
 module Dripper
+  # this file is called dripper_mail because the gem needs to be named the same as the default file
   @registry = []
   mattr_accessor :job_queue
 
@@ -36,6 +37,7 @@ class DripperProxy
   attr_accessor :wait_until
 
   def initialize(opts={}, &block)
+    @scopes = []
     # if there's a parent, initialize all values to the parent values first
     # then override with children
     [:model, :mailer, :action, :wait, :wait_until].each do |method|
@@ -47,16 +49,9 @@ class DripperProxy
 
     #overwrite any defined options
     opts.each { |k,v| instance_variable_set("@#{k}", v) }
-
-    # merge the parent scopes if they exist
-    if self.parent && self.parent.scope
-      if opts[:scope]
-        instance_variable_set "@scope", self.parent.scope.merge(opts[:scope])
-      else
-        instance_variable_set "@scope", self.parent.scope
-      end
+    if opts[:scope]
+      @scopes << opts[:scope] 
     end
-
 
     @children = []
     instance_eval(&block) if block
@@ -90,9 +85,13 @@ class DripperProxy
       .select(:drippable_id)
 
     final_scope = all_recs
-      .merge(self.scope)
       .where.not(id: already_sent)
       .where("#{self.model.to_s.classify.constantize.table_name}.created_at >= ?", dripper_action.created_at.change(usec: 0))
+
+    # merge all the scopes
+    @scopes.each do |s|
+      final_scope = final_scope.merge s
+    end
 
     if item
       final_scope = final_scope.where(id: item.id)
