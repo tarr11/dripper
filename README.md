@@ -107,7 +107,7 @@ end
 This could potentially replace devise's awful mess :)
 ```
 dripper model: :users do
-  dripper mailer: :user_mailer, actio: :confirmation, scope: -> { unconfirmed }
+  dripper mailer: :user_mailer, action: :confirmation, scope: -> { unconfirmed }
 end
 ```
 
