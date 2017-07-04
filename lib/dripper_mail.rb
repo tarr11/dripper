@@ -68,7 +68,7 @@ class DripperProxy
 
   def register
     # don't register until migrations have completed
-    if ActiveRecord::Base.connection.table_exists? 'dripper_actions'
+    if ActiveRecord::Base.connection.data_source_exists? 'dripper_actions'
       Dripper::Action.where(action: self.action.to_s, mailer: self.mailer.to_s).first_or_create
     end
   end
