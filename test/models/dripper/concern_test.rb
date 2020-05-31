@@ -21,9 +21,9 @@ module Dripper
 
     test "Concern Test" do
 
-      # make sure it never runs again for the same users
       msg = mock()
       msg.stubs(:deliver_now)
+      msg.stubs(:deliver_later)
 
       UserMailer.stubs(:newsletter)
         .with(instance_of(Newsletter))
@@ -32,7 +32,7 @@ module Dripper
 
       u = User.create(email: "foo@bar.com")
       Newsletter.create(user: u, title: "test")
-
+      Dripper.execute
     end
 
   end
