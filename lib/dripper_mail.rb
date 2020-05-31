@@ -12,9 +12,13 @@ module Dripper
   end
 
   def self.config(opts={}, &block)
-    DripperProxy.new(opts, &block)
-    @registry.each do |r|
-      r.register
+    # avoid connecting to the database during precompilation
+    # https://medium.com/@kusumandaru/solve-initializer-is-trying-to-connect-db-on-rake-assets-precompile-4ff02d0c2a0b
+    if !defined?(::Rake::SprocketsTask)
+      DripperProxy.new(opts, &block)
+      @registry.each do |r|
+        r.register
+      end
     end
   end
 
@@ -97,6 +101,7 @@ class DripperProxy
       final_scope = final_scope.where(id: item.id)
     end
 
+
     return final_scope
 
   end
@@ -104,6 +109,8 @@ class DripperProxy
   def execute(item = nil)
 
     dripper_action = Dripper::Action.find_by(action: self.action.to_s, mailer: self.mailer.to_s)
+    puts self.action.to_s
+    puts scoped_recs(item).to_sql
     scoped_recs(item).each do |obj|
 
       # instantiate the mailer and run the code
