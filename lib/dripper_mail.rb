@@ -19,7 +19,6 @@ module Dripper
       end
     rescue
       # Not sure what the best way to do this is.  This is a hack.
-      logger.info "Could not initialize Dripper.  Usually this occurs during precompilation and is harmless."
     end
   end
 
