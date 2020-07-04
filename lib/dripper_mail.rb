@@ -12,13 +12,14 @@ module Dripper
   end
 
   def self.config(opts={}, &block)
-    # avoid connecting to the database during precompilation
-    # https://medium.com/@kusumandaru/solve-initializer-is-trying-to-connect-db-on-rake-assets-precompile-4ff02d0c2a0b
-    unless ARGV.include? "assets:precompile"
+    begin
       DripperProxy.new(opts, &block)
       @registry.each do |r|
         r.register
       end
+    rescue
+      # Not sure what the best way to do this is.  This is a hack.
+      logger.info "Could not initialize Dripper.  Usually this occurs during precompilation and is harmless."
     end
   end
 
